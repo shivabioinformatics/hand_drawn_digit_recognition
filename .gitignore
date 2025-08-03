@@ -1,3 +1,13 @@
+
+.gitignore:
+pycache/
+*.pkl
+.vscode/
+*.pyc
+*.png
+HandDigit/
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
