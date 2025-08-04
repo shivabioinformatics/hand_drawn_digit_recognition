@@ -20,8 +20,11 @@ def preprocess_image(path):
 def predict_digit(image_path):
     model, target_names = joblib.load("digit_model.pkl")
     input_data = preprocess_image(image_path)
-    prediction = model.predict([input_data])[0]
-    print(f"🔢 Predicted digit: {prediction}")
+    prediction = model.predict([input_data])[0]    
+    proba = model.predict_proba([input_data])[0]
+    confidence = np.max(proba) * 100
+    print(f"🔢 Predicted digit: {prediction} ({confidence:.1f}% confidence)")
+
 
     # Optional: Show processed image
     plt.imshow(input_data.reshape(8, 8), cmap='gray')
