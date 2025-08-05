@@ -1,36 +1,45 @@
 # here i load model and predict custom image
 
-import cv2
-import numpy as np
+# predict.py
+
 import joblib
-import matplotlib.pyplot as plt
+import numpy as np
+import cv2
 
-def preprocess_image(path):
-    img = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
+# Load model once when this module is imported
+model, target_names = joblib.load("digit_model.pkl")
+
+def predict_digit_from_array(img_array):
+    """
+    img_array: numpy array representing the image in RGB or grayscale
+    Returns: predicted digit (int)
+    """
+    # Convert to grayscale if needed
+    if len(img_array.shape) == 3:
+        gray = cv2.cvtColor(img_array, cv2.COLOR_RGB2GRAY)
+    else:
+        gray = img_array
+
+    # Resize to 8x8 (sklearn digits size)
+    small = cv2.resize(gray, (8, 8), interpolation=cv2.INTER_AREA)
+
+    # Invert colors and scale to 0-16
+    small = 255 - small
+    small = (small / 16).clip(0, 16)
+
+    input_data = small.flatten().reshape(1, -1)
+
+    probs = model.predict_proba(input_data)[0]  # Probability array for all classes
+    prediction = model.predict(input_data)[0]
+    confidence = probs[prediction]
+
+    return prediction, confidence
+
+def predict_digit_from_file(image_path):
+    """
+    Load image from path and predict digit.
+    """
+    img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
     if img is None:
-        raise FileNotFoundError(f"Image not found: {path}")
-    
-    img_resized = cv2.resize(img, (8, 8), interpolation=cv2.INTER_AREA)     # sklearn digits are 8x8
-    img_resized = 255 - img_resized      # MNIST uses white digits on black bg
-    img_normalized = img_resized / 16.0 # sklearn digits use values 0–16
-    img_flattened = img_normalized.flatten()
-
-    return img_flattened
-
-def predict_digit(image_path):
-    model, target_names = joblib.load("digit_model.pkl")
-    input_data = preprocess_image(image_path)
-    prediction = model.predict([input_data])[0]    
-    proba = model.predict_proba([input_data])[0]
-    confidence = np.max(proba) * 100
-    print(f"🔢 Predicted digit: {prediction} ({confidence:.1f}% confidence)")
-
-
-    # Optional: Show processed image
-    plt.imshow(input_data.reshape(8, 8), cmap='gray')
-    plt.title(f"Predicted: {prediction}")
-    plt.axis('off')
-    plt.show()
-
-if __name__ == "__main__":
-    predict_digit("digit.png")
+        raise FileNotFoundError(f"Image not found: {image_path}")
+    return predict_digit_from_array(img)
