@@ -21,6 +21,12 @@ plot_tree(
     rounded=True,
     fontsize=10
 )
+
 plt.title("Decision Tree from RandomForest (Depth 3)")
 plt.tight_layout()
+
+plt.savefig("tree_visualization.png")
+print("Saved tree to tree_visualization.png")
+
 plt.show()
+
