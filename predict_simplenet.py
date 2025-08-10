@@ -4,7 +4,6 @@ import torch
 import torch.nn.functional as F
 from torchvision import transforms
 from PIL import Image, ImageOps
-import numpy as np
 
 # Same SimpleNet definition from training
 class SimpleNet(torch.nn.Module):
